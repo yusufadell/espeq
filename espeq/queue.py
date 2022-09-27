@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import re
-
-
 class Queue:
     __slots__ = [
         "name",
