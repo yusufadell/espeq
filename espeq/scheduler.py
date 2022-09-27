@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 from .serializer import serialize
 
@@ -9,7 +9,7 @@ log = logging.getLogger("espeq")
 
 @dataclass
 class CronTask:
-    schedule: Union(List, Tuple) = field(default_factory=list)
+    schedule: List | Tuple = field(default_factory=(list, tuple))
     task_name: str = None
     queue_name: str = None
     args: str = None
