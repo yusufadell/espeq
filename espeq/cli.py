@@ -3,10 +3,11 @@ import json
 import sys
 
 import click
-import utils
 
 from espeq.utils import import_app
 from espeq.worker import Worker
+
+from . import utils
 
 
 @click.command()
@@ -18,7 +19,7 @@ def main(args=None):
 
 
 @click.command()
-@click.option("--app", required=True, help="Import path of the WakaQ instance.")
+@click.option("--app", required=True, help="Import path of the EspeQ instance.")
 def worker(**options):
     """Run worker(s) to process tasks from queue(s) defined in your app."""
     espeq = import_app(options.pop("app"))
@@ -27,7 +28,7 @@ def worker(**options):
 
 
 @click.command()
-@click.option("--app", required=True, help="Import path of the WakaQ instance.")
+@click.option("--app", required=True, help="Import path of the EspeQ instance.")
 def info(**options):
     """Inspect and print info about your queues."""
     espeq = import_app(options.pop("app"))
