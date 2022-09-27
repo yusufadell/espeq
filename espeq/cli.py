@@ -8,6 +8,7 @@ from espeq.utils import import_app
 from espeq.worker import Worker
 
 from . import utils
+from .scheduler import Scheduler
 
 
 @click.command()
@@ -35,6 +36,21 @@ def info(**options):
     _info = utils.inspect(espeq)
     json_formatted_str = json.dumps(_info, indent=2, sort_keys=True)
     click.echo(json_formatted_str)
+
+
+@click.command()
+@click.option("--app", required=True, help="Import path of the WakaQ instance.")
+@click.option(
+    "--foreground",
+    is_flag=True,
+    help="Run in foreground; Default is to run as daemon in background.",
+)
+def scheduler(**options):
+    """Run a scheduler to enqueue periodic tasks based on a schedule defined in your app."""
+    wakaq = import_app(options.pop("app"))
+    result = Scheduler(wakaq=wakaq, **options)
+    if result:
+        click.fail(result)
 
 
 if __name__ == "__main__":
