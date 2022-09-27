@@ -25,12 +25,15 @@ class Task:
         def inner(*args, **kwargs):
             return self.fn(*args, **kwargs)
 
-        inner.delay = self.delay
+        inner.delay = self._delay
         self.fn = inner
 
-    def delay(self, *args, **kwargs):
-        queue = kwargs.pop("queue", None)
+    def _delay(self, *args, **kwargs):
+        queue = kwargs.pop("queue", None) or self.queue
         eta = kwargs.pop("eta", None)
+        self._enqueue_with_eta(args, kwargs, queue, eta)
+
+    def _enqueue_with_eta(self, args, kwargs, queue, eta):
         if queue:
             queue = self._create_queue(queue)
         else:
