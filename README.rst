@@ -22,11 +22,42 @@ Distributed background task queue for Python, powered by Redis protocol.
 * Free software: GNU General Public License v3
 * Documentation: https://espeq.readthedocs.io.
 
+## Example
+
+..  code-block:: python
+    :caption: queue tasks passed to broker with delayed execution base on priority
+    from espeq import EspeQ
+
+    espeq = EspeQ(
+        queues=[
+            (0, 'a-high-priority-queue'),
+            (1, 'a-medium-priority-queue'),
+            (2, 'a-low-priority-queue'),
+        ],
+    )
+
+
+    @espeq.task(queue='medium-priority-queue')
+    def mytask(x, y):
+        print(x + y)
+
+
+    if __name__ == '__main__':
+        # add 1 plus 1 on a worker somewhere, overwriting the default queue from medium to high priority
+        mytask.delay(1, 1, queue='hight-priority-queue')
+
+
 
 Features
 --------
 
-* TODO
+* [x] scheduler
+* [x] admin info inspection,
+* [ ] purging queues
+* [ ] logging
+* [ ] handle child process crash/exception and re-fork
+* [ ] tests
+
 
 Credits
 -------
