@@ -3,10 +3,12 @@ from typing import Any, List
 
 from .serializer import serialize
 
+log = logging.getLogger("espeq")
+
 
 @dataclass
 class CronTask:
-    schedule: List = field(default_factory=list)
+    schedule: Union(List, Tuple) = field(default_factory=list)
     task_name: str = None
     queue_name: str = None
     args: str = None
@@ -20,14 +22,23 @@ class CronTask:
     )
 
     @classmethod
-    def create(cls):
-        ...
-
-
-@dataclass
-class Scheduler:
-    espeq: Any = None
-    schedules: List = field(default_factory=list)
+    def create(cls, obj, queues_by_name=None):
+        if isinstance(obj, cls):
+            if (
+                queues_by_name is not None
+                and obj.queue
+                and obj.queue not in queues_by_name
+            ):
+                log.error(f"Unknown queue: {obj.queue}")
+                raise Exception(f"Unknown queue: {obj.queue}")
+            return obj
+        elif isinstance(obj, (list, tuple)) and len(obj) == 2:
+            return cls(schedule=obj[0], task_name=obj[1])
+        elif isinstance(obj, (list, tuple)) and len(obj) == 4:
+            return cls(schedule=obj[0], task_name=obj[1], args=obj[2], kwargs=obj[3])
+        else:
+            log.error(f"Invalid schedule: {obj}")
+            raise Exception(f"Invalid schedule: {obj}")
 
     def _run(self):
         ...
