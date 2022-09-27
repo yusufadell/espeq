@@ -55,8 +55,11 @@ class EspeQ:
         self.queues.sort(key=lambda q: q.priority)
 
     def task(self, func, queue=None):
-        t = Task(func=func, espeq=self, queue=queue)
-        if t.name in self.tasks:
-            raise Exception(f"Duplicate task name: {t.name}")
-        self.tasks[t.name] = t
-        return t.func
+        def _task(f):
+            t = Task(func=f, espeq=self, queue=queue)
+            if t.name in self.tasks:
+                raise Exception(f"Duplicate task name: {t.name}")
+            self.tasks[t.name] = t
+            return t.func
+
+        return _task(func) if func else _task
