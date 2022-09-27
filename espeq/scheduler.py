@@ -1,5 +1,6 @@
+import logging
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import List, Tuple, Union
 
 from .serializer import serialize
 
@@ -40,5 +41,12 @@ class CronTask:
             log.error(f"Invalid schedule: {obj}")
             raise Exception(f"Invalid schedule: {obj}")
 
-    def _run(self):
-        ...
+    @property
+    def payload(self):
+        return serialize(
+            {
+                "name": self.task_name,
+                "args": self.args if self.args is not None else [],
+                "kwargs": self.kwargs if self.kwargs is not None else {},
+            }
+        )
