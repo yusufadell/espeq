@@ -1,32 +1,32 @@
 import time
-from dataclasses import dataclass, field
 from functools import wraps
-from typing import Any, List
-
-from espeq import EspeQ
 
 from .queue import Queue
 from .serializer import serialize
 
 
-@dataclass
 class Task:
-    func: Any = None
-    name: str = func.__name__
-    espeq: EspeQ = None
-    queue: List[Queue] = field(default_factory=list)
+    __slots__ = [
+        "name",
+        "fn",
+        "espeq",
+        "queue",
+    ]
 
-    def __init__(self, queue=None):
-
-        if queue is not None:
+    def __init__(self, fn=None, espeq=None, queue=None):
+        self.name = fn.__name__
+        self.espeq = espeq
+        if queue:
             self.queue = self._create_queue(queue)
+        else:
+            self.queue = None
 
-        @wraps(self.fn)
+        @wraps(fn)
         def inner(*args, **kwargs):
-            return self.fn(*args, **kwargs)
+            return fn(*args, **kwargs)
 
-        inner.delay = self._delay
         self.fn = inner
+        inner.delay = self._delay
 
     def _delay(self, *args, **kwargs):
         queue = kwargs.pop("queue", None) or self.queue
