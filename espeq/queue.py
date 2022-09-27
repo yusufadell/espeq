@@ -12,8 +12,8 @@ class Queue:
     ]
 
     def __init__(self, name=None, priority=0, prefix=None):
-        self.name = re.sub(r"[^a-zA-Z0-9_.-]", "", name)
-        self.prefix = re.sub(r"[^a-zA-Z]", "", prefix or "wakaq")
+        self.name = name
+        self.prefix = prefix or "EspeQ"
 
         try:
             self.priority = int(priority)
@@ -29,8 +29,8 @@ class Queue:
             elif cls.valid_sequence_type(obj):
                 cls._handle_sequence_type_obj(obj, queues_by_name)
 
-            elif obj not in queues_by_name:
-                raise Exception(f"Unknown queue: {obj}")
+            # elif obj not in queues_by_name:
+            #     raise Exception(f"Unknown queue: {obj}")
 
         return cls(name=obj)
 
