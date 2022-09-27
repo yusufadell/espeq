@@ -18,14 +18,12 @@ __all__ = [
 ]
 
 
-class WakaQ:
+class EspeQ:
     queues = []
+    schedules = []
     queues_by_name = {}
     tasks = {}
-    eta_task_key = "wakaq-eta"
-    schedules = []
-    wait_timeout = None
-    broker = None
+    eta_task_key = "espeq-eta"
 
     def __init__(
         self,
@@ -38,10 +36,10 @@ class WakaQ:
         health_check_interval=30,
         wait_timeout=10,
     ):
-        self.queues = [Queue.create(x) for x in queues]
-        self.queues.sort(key=lambda q: q.priority)
-        self.queues_by_name = dict([(x.name, x) for x in self.queues])
-        self.schedules = [CronTask.create(x) for x in schedules]
+        self.queues = [Queue.create(queue) for queue in queues]
+        self.priority_sort()
+        self.queues_by_name = {queue.name: queue for queue in self.queues}
+        self.schedules = [CronTask.create(schedule) for schedule in schedules]
         self.wait_timeout = wait_timeout
         self.broker = redis.Redis(
             host=host,
@@ -52,6 +50,9 @@ class WakaQ:
             socket_timeout=socket_timeout,
             socket_connect_timeout=socket_connect_timeout,
         )
+
+    def priority_sort(self):
+        self.queues.sort(key=lambda q: q.priority)
 
     def task(self, func, queue=None):
         t = Task(func=func, espeq=self, queue=queue)
