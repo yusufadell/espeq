@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from queue import Queue
 
 import daemon
@@ -15,15 +15,22 @@ local results = redis.call('ZRANGEBYSCORE', KEYS[1], 0, ARGV[1])
 redis.call('ZREMRANGEBYSCORE', KEYS[1], 0, ARGV[1])
 return results
 """
-from typing import Any
+from typing import List, TypeVar
+
+_T = TypeVar("_T")
 
 
 @dataclass
 class Worker:
-    espeq: Any = None
+    __slots__ = [
+        "wakaq",
+        "children",
+    ]
+    espeq: _T = None
     concurrency: int = 1
     exclude_queues: str = ""
     foreground: bool = False
+    children: List = field(default_factory=list)
 
     def __init__(self):
         if self.foreground:
@@ -33,18 +40,25 @@ class Worker:
             self._run()
 
     def _run(self):
-        is_parent = True
-        for i in range(self.concurrency):
+        pid = None
+        for i in range(self.espeq.concurrency):
             pid = os.fork()
             if pid == 0:  # child
-                is_parent = False
-                while True:
-                    self._enqueue_ready_eta_tasks()
-                    self._execute_next_task_from_queue()
+                self._child()
+            else:
+                self.children.append(pid)
 
-        if is_parent:
-            while True:
-                time.sleep(10)
+        if pid != 0:  # parent
+            self._parent()
+
+    def _parent(self):
+        while True:
+            time.sleep(10)
+
+    def _child(self):
+        while True:
+            self._enqueue_ready_eta_tasks()
+            self._execute_next_task_from_queue()
 
     def _enqueue_ready_eta_tasks(self):
         script = self.espeq.broker.register_script(ZRANGEPOP)

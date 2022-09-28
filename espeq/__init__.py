@@ -4,6 +4,8 @@ __author__ = """Yusuf Adel"""
 __email__ = "yusufadell.dev@gmail.com"
 __version__ = "0.1.0"
 
+import multiprocessing
+
 import redis
 
 from .cli import worker
@@ -24,6 +26,8 @@ class EspeQ:
     queues_by_name = {}
     tasks = {}
     eta_task_key = "espeq-eta"
+    concurrency = 0
+    exclude_queues = []
 
     def __init__(
         self,
@@ -32,6 +36,8 @@ class EspeQ:
         host="localhost",
         port=6379,
         socket_timeout=15,
+        concurrency=0,
+        exclude_queues=[],
         socket_connect_timeout=15,
         health_check_interval=30,
         wait_timeout=10,
@@ -40,6 +46,9 @@ class EspeQ:
         self.priority_sort()
         self.queues_by_name = {queue.name: queue for queue in self.queues}
         self.schedules = [CronTask.create(schedule) for schedule in schedules]
+        self.concurrency = abs(int(concurrency)) or multiprocessing.cpu_count()
+        self.exclude_queues = self._validate_queue_names(exclude_queues)
+
         self.wait_timeout = wait_timeout
         self.broker = redis.Redis(
             host=host,
@@ -67,3 +76,13 @@ class EspeQ:
             return t.fn
 
         return _task(fn) if fn else _task
+
+    def _validate_queue_names(self, queue_names: list) -> list:
+        try:
+            queue_names = [x for x in queue_names]
+        except:
+            return []
+        for queue_name in queue_names:
+            if queue_name not in self.queues_by_name:
+                raise Exception(f"Invalid queue: {queue_name}")
+        return queue_names

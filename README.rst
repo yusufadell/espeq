@@ -55,6 +55,7 @@ Features
 * [x] admin info inspection,
 * [ ] purging queues
 * [ ] logging
+* [ ] Broadcast to all workers
 * [ ] handle child process crash/exception and re-fork
 * [ ] tests
 
