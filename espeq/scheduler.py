@@ -67,20 +67,20 @@ class CronTask:
 
 class Scheduler:
     __slots__ = [
-        "wakaq",
+        "espeq",
         "schedules",
     ]
 
-    def __init__(self, wakaq=None, foreground=False):
-        self.wakaq = wakaq
+    def __init__(self, espeq=None, foreground=False):
+        self.espeq = espeq
 
-        if len(self.wakaq.schedules) == 0:
+        if len(self.espeq.schedules) == 0:
             return "No scheduled tasks found."
 
         self.schedules = []
-        for schedule in self.wakaq.schedules:
+        for schedule in self.espeq.schedules:
             self.schedules.append(
-                CronTask.create(schedule, queues_by_name=self.wakaq.queues_by_name)
+                CronTask.create(schedule, queues_by_name=self.espeq.queues_by_name)
             )
 
         if foreground:
@@ -97,14 +97,14 @@ class Scheduler:
         while True:
             if len(upcoming_tasks) > 0:
                 for cron_task in upcoming_tasks:
-                    task = self.wakaq.tasks[cron_task.task_name]
+                    task = self.espeq.tasks[cron_task.task_name]
                     if cron_task.queue_name:
-                        queue = self.wakaq.queues_by_name[cron_task.queue_name]
+                        queue = self.espeq.queues_by_name[cron_task.queue_name]
                     elif task.queue:
                         queue = task.queue
                     else:
-                        queue = self.wakaq.queues[-1]
-                    self.wakaq.broker.lpush(queue.broker_key, cron_task.payload)
+                        queue = self.espeq.queues[-1]
+                    self.espeq.broker.lpush(queue.broker_key, cron_task.payload)
 
             upcoming_tasks = []
             crons = []

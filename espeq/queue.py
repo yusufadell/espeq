@@ -8,9 +8,9 @@ class Queue:
         "prefix",
     ]
 
-    def __init__(self, name=None, priority=0, prefix=None):
+    def __init__(self, name=None, priority=0, prefix="EspeQ"):
         self.name = name
-        self.prefix = prefix or "EspeQ"
+        self.prefix = prefix
 
         try:
             self.priority = int(priority)

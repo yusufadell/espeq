@@ -39,7 +39,7 @@ def info(**options):
 
 
 @click.command()
-@click.option("--app", required=True, help="Import path of the WakaQ instance.")
+@click.option("--app", required=True, help="Import path of the espeq instance.")
 @click.option(
     "--foreground",
     is_flag=True,
@@ -47,8 +47,8 @@ def info(**options):
 )
 def scheduler(**options):
     """Run a scheduler to enqueue periodic tasks based on a schedule defined in your app."""
-    wakaq = import_app(options.pop("app"))
-    result = Scheduler(wakaq=wakaq, **options)
+    espeq = import_app(options.pop("app"))
+    result = Scheduler(espeq=espeq, **options)
     if result:
         click.fail(result)
 

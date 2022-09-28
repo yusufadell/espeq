@@ -26,6 +26,7 @@ class EspeQ:
     queues_by_name = {}
     tasks = {}
     eta_task_key = "espeq-eta"
+    broadcast_key = 'espeq-broadcast'
     concurrency = 0
     exclude_queues = []
 
