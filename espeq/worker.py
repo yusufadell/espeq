@@ -23,17 +23,14 @@ _T = TypeVar("_T")
 
 @dataclass
 class Worker:
-    __slots__ = [
-        "espeq",
-        "children",
-    ]
+
     espeq: _T = None
     concurrency: int = 1
     exclude_queues: str = ""
     foreground: bool = False
     children: List = field(default_factory=list)
 
-    def __init__(self, espeq=None):
+    def __init__(self, espeq):
         self.espeq = espeq
 
     def start(self, foreground=False):
