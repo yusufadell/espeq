@@ -44,7 +44,7 @@ Distributed background task queue for Python, powered by Redis protocol.
 
     if __name__ == '__main__':
         # add 1 plus 1 on a worker somewhere, overwriting the default queue from medium to high priority
-        mytask.delay(1, 1, queue='hight-priority-queue')
+        mytask.delay(1, 1, queue='high-priority-queue')
 
 
 
