@@ -70,7 +70,7 @@ class Task:
             "kwargs": kwargs,
         }
         payload = serialize(payload)
-        return self.wakaq.broker.publish(self.wakaq.broadcast_key, payload)
+        return self.espeq.broker.publish(self.espeq.broadcast_key, payload)
 
     def _create_queue(self, queue):
         return Queue.create(queue, queues_by_name=self.espeq.queues_by_name)

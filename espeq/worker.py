@@ -53,19 +53,19 @@ class Worker:
 
     def _parent(self):
         signal.signal(signal.SIGCHLD, self._on_child_exit)
-        self.wakaq.broker.close()
-        pubsub = self.wakaq.broker.pubsub()
-        pubsub.subscribe(self.wakaq.broadcast_key)
+        self.espeq.broker.close()
+        pubsub = self.espeq.broker.pubsub()
+        pubsub.subscribe(self.espeq.broadcast_key)
         while True:
             msg = pubsub.get_message(ignore_subscribe_messages=True, timeout=10)
             if msg:
                 queue_broker_key, payload = self._handle_pub_message(msg)
-                self.wakaq.broker.lpush(queue_broker_key, payload)
+                self.espeq.broker.lpush(queue_broker_key, payload)
 
     def _handle_pub_message(self, msg):
         payload = deserialize(msg["data"])
         queue = Queue.create(
-            payload.pop("queue"), queues_by_name=self.wakaq.queues_by_name
+            payload.pop("queue"), queues_by_name=self.espeq.queues_by_name
         )
         payload = serialize(payload)
         return queue.broker_key, payload
