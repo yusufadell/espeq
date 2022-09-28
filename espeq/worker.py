@@ -1,5 +1,6 @@
 import logging
 import os
+import signal
 import time
 from dataclasses import dataclass, field
 from queue import Queue
@@ -23,7 +24,7 @@ _T = TypeVar("_T")
 @dataclass
 class Worker:
     __slots__ = [
-        "wakaq",
+        "espeq",
         "children",
     ]
     espeq: _T = None
@@ -32,9 +33,15 @@ class Worker:
     foreground: bool = False
     children: List = field(default_factory=list)
 
-    def __init__(self):
-        if self.foreground:
+    def __init__(self, espeq=None):
+        self.espeq = espeq
+
+    def start(self, foreground=False):
+        self.children = []
+
+        if foreground:
             self._run()
+            return
 
         with daemon.DaemonContext():
             self._run()
@@ -42,26 +49,46 @@ class Worker:
     def _run(self):
         pid = None
         for i in range(self.espeq.concurrency):
-            pid = os.fork()
-            if pid == 0:  # child
-                self._child()
-            else:
-                self.children.append(pid)
+            pid = self._fork()
 
         if pid != 0:  # parent
             self._parent()
 
     def _parent(self):
+        signal.signal(signal.SIGCHLD, self._on_child_exit)
         while True:
             time.sleep(10)
 
     def _child(self):
+        # ignore ctrl-c sent to process group from terminal
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         # redis should eventually detect pid change and reset, but we force it
-        self.wakaq.broker.connection_pool.reset()
+        self.espeq.broker.connection_pool.reset()
 
         while True:
             self._enqueue_ready_eta_tasks()
             self._execute_next_task_from_queue()
+
+    def _fork(self) -> int:
+        pid = os.fork()
+        if pid == 0:
+            self._child()
+        else:
+            self.children.append(pid)
+        return pid
+
+    def _on_child_exit(self, signum, frame):
+        for child in self.children:
+            try:
+                pid, _ = os.waitpid(child, os.WNOHANG)
+                if pid != 0:  # child exited
+                    self.children.remove(child)
+            except InterruptedError:  # child exited while calling os.waitpid
+                self.children.remove(child)
+            except ChildProcessError:  # child pid no longer valid
+                self.children.remove(child)
+        self._refork_missing_children()
 
     def _enqueue_ready_eta_tasks(self):
         script = self.espeq.broker.register_script(ZRANGEPOP)
