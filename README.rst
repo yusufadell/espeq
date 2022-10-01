@@ -85,7 +85,6 @@ Features
 * [x] admin info inspection,
 * [x] handle child process crash/exception and re-fork
 * [x] Broadcast to all workers
-* [ ] purging queues
 * [ ] logging
 * [ ] tests
 
