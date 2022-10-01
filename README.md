@@ -13,9 +13,6 @@ Distributed background task queue for Python, powered by Redis protocol.
 - Free software: GNU General Public License v3
 - Documentation: <https://espeq.readthedocs.io>.
 
-``` {.python caption="queue tasks passed to broker with delayed execution base on priority"}
-```
-
 ## Example
 
 ```python
